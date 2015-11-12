@@ -46,9 +46,11 @@ ProcessInstance是流程实例，Execution是流程的一个执行实例。一�
 流程引擎配置
 
 通过ProcessEngineConfiguration.createXXX()返回ProcessEngineConfiguration对象。createXXX分为两类：一类传入activiti.cfg.xml文件路径；一类采用默认内置的H2数据库。###ProcessEngine
-流程引擎接口，提供流程管理和运作的所有接口。
-获取方式：
-1. ProcessEngines获取默认ProcessEngine			ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();2. 搜索classpath下得activiti.cfg.xml文件
+流程引擎接口，提供流程管理和运作的所有接口。  
+
+获取方式：  
+1. ProcessEngines获取默认ProcessEngine			ProcessEngine processEngine = ProcessEngines.getDefaultProcessEngine();
+2. 搜索classpath下得activiti.cfg.xml文件
 		ProcessEngineConfiguration. buildProcessEngine()使用方式：	
 提供获取所有Service的接口
 
@@ -58,30 +60,30 @@ ProcessInstance是流程实例，Execution是流程的一个执行实例。一�
 * ManagementService managementService = processEngine.getManagementService();
 * IdentityService identityService = processEngine.getIdentityService();
 * HistoryService historyService = processEngine.getHistoryService();
-* FormService formService = processEngine.getFormService();###RepositoryService管理部署（Deployments）和流程定义（Process Definitions）。用于管理静态资源。获取方式：	
+* FormService formService = processEngine.getFormService();###RepositoryService管理部署（Deployments）和流程定义（Process Definitions）。用于管理静态资源。    获取方式：	
 	RepositoryService repositoryService = processEngine.getRepositoryService();使用方式：
 1. 查询部署
 		DeploymentQuery deploymentQuery= repositoryService.createDeploymentQuery();2. 查询流程定义		ProcessDefinitionQuery processDefinitionQuery = repositoryService.createProcessDefinitionQuery();3. 部署和删除流程定义		DeploymentBuilder deploymentBuilder = repositoryService.createDeployment();		Deployment deployment = deploymentBuilder.addClasspathResource(String  resource). deploy();		String deploy_id = deployment.getId();		repositoryService.deleteDeployment(deploymentID, true);		如果为true，则流程定义和其关联的流程实例一起删除		如果为false，则只删除流程定义，不删除流程实例，如果有关联的流程实例，则抛异常###RuntimeService
-运行时服务接口，提供流程启动服务，运行中流程查询，运行变量设置和获取。
+运行时服务接口，提供流程启动服务，运行中流程查询，运行变量设置和获取。    
 
 获取方式：
-	RuntimeService runtimeService = processEngine.getRuntimeService();使用方式：
+    	RuntimeService runtimeService = processEngine.getRuntimeService();使用方式：
 1. 启动流程实例		ProcessInstance processInstance = runtimeService.startProcessInstanceByKey("bookorder", variableMap);		startProcessInstanceByKey(String processDefinitionKey)会立刻创建并执行流程实例，直到遇到wait状态时才返回流程实例
 		UserTask是让其遇到Wait状态的情况之一，Script Task不是。				startProcessInstanceById(String processDefinitionID)，processDefinitionID由RepositoryService部署时返回				区别是同一流程名称PD_KEY可能有多个流程定义，startProcessInstanceByKey总是以最新的流程定义创建流程实例，startProcessInstanceById是以某个流程定义创建流程实例。2. 查询流程实例	
 		List<ProcessInstance> instanceList = runtimeService .createProcessInstanceQuery().processDefinitionKey("bookorder") .list();		返回某个流程定义的所有流程实例，如果需要指定某个实例，用processDefinitionId3. 查询流程实例变量	
 	
 		获取某个流程实例的某个变量的值		runtimeService.getVariable(processInstance.getId(), "validatetime");###TaskService
 用户任务接口（UserTask），提供运行时任务查询、领取、完成、删除及变量设置用户管理等服务。
-获取方式：		TaskService taskService = processEngine.getTaskService();使用方式：1. 查询任务	
+    获取方式：	  	TaskService taskService = processEngine.getTaskService();使用方式：1. 查询任务	
 		TaskQuery tq = TaskService.createTaskQuery();  //创建查询条件		tq.taskCandidateUser();                        //任务所有者		tq.processDefinitionKey();		                //流程定义key		tq.taskId(String id);  			                //任务ID		tq.taskCandidateUser(String userID);           //候选人ID		tq.taskAssignee(String userID);                //负责人ID		tq.taskCreatedAfter(Date date);                //任务创建时间在这之后		tq.taskCreatedBefore(Date date);               //任务创建时间在这之前		tq.taskDescriptionLike(String desc);           //任务描述正则式		//按照任务创建时间升序创建查询		TaskQuery tqu = tq.orderByTaskCreateTime().asc();		//返回查询到的Task		List<Task> results = tqu.list();2. 认领和完成任务		Task task = taskService.newTask();		taskService.saveTask(task);		taskService.addCandidateUser(taskID,  userID);		taskService.claim(taskID, userID);		taskService.complete(taskID);		任务优先级为[0,100]，默认为50###IdentityService
-用户和组管理接口
-获取方式：	IdentityService identityService = processEngine.getIdentityService();使用方式：1. 用户操作	
-		User newUser = identityService.newUser(String userID);		identityService.saveUser(newUser);		UserQuery userQuery = identityService.createUserQuery();2. 组操作		
-		Group newGroup = identityService.newGroup(String groupId);		identityService.saveGroup(newGroup);		GroupQuery groupQuery = identityService.createGroupQuery()3. 其他操作		identityService.createMembership(String userID,  String groupID);		将用户加入组		identityService.setAuthenticatedUserId("John Doe");		设置任务发起人，也可在bpmn文件中配置userID=starter的为活动发起人		<startEvent id="startEvent" activiti:initiator="starter" />###ManagementService
+用户和组管理接口   
+获取方式：    	IdentityService identityService = processEngine.getIdentityService();使用方式：1. 用户操作	
+		User newUser = identityService.newUser(String userID);		identityService.saveUser(newUser);		UserQuery userQuery = identityService.createUserQuery();2. 组操作  		
+   		Group newGroup = identityService.newGroup(String groupId);		identityService.saveGroup(newGroup);		GroupQuery groupQuery = identityService.createGroupQuery()3. 其他操作		identityService.createMembership(String userID,  String groupID);		将用户加入组		identityService.setAuthenticatedUserId("John Doe");		设置任务发起人，也可在bpmn文件中配置userID=starter的为活动发起人		<startEvent id="startEvent" activiti:initiator="starter" />###ManagementService
 流程引擎管理接口
 
 获取方式：
-		ManagementService managementService = processEngine.getManagementService();使用方式：1. 查询数据库的表和表的元数据；2. 查询和管理异步操作的功能，如定时器，延迟暂停激活等。###HistoryService
+    		ManagementService managementService = processEngine.getManagementService();使用方式：1. 查询数据库的表和表的元数据；2. 查询和管理异步操作的功能，如定时器，延迟暂停激活等。###HistoryService
 流程处理查询接口，包括执行中流程查询和历史流程查询。
 
 <img src="./pic/activiti_3.png" width="500"/>
@@ -94,7 +96,7 @@ ProcessInstance是流程实例，Execution是流程的一个执行实例。一�
 配置：
 	
 	通过activiti.cfg.xml中设置Activiti Engine的属性，设置输出日志等级：	<bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">	<property name="deploymentResources" value="classpath*:/*.bpmn" />		<property name="history" value="full" />	</bean>- None：不输出- Activity：归档流程和活动信息- Audit：默认，归档流程、活动、表属性- Full：在Audit基础上，归档流程变量和用户任务的表属性
-获取方式：	
+    获取方式：	   
 	HistoryService historyService = processEngine.getHistoryService();使用方式：1. 获取历史流程	
 		HistoricProcessInstanceQuery historicProcessInstanceQuery=historyService.createHistoricProcessInstanceQuery()		HistoricProcessInstance historicProcessInstance =historicProcessInstanceQuery.processInstanceId(processInstanceID).singleResult();2. 获取历史活动	
 		HistoricActivityInstanceQuery historicActivityInstanceQuery = historyService.createHistoricActivityInstanceQuery()3. 获取历史细节（在full等级生效）		HistoricDetailQuery historicDetailQuery = historyService.createHistoricDetailQuery()
@@ -103,13 +105,25 @@ ProcessInstance是流程实例，Execution是流程的一个执行实例。一�
 可选，提供了启动表单和任务表单两个概念。启动表单会在流程实例启动之前展示给用户，任务表单会在用户完成任务时展示。获取方式：	
 	FormService formService = processEngine.getFormService();配置bpmn文件：	<activiti:formProperty id="name" name="Name" required="true" type="string" />	默认type为string，还可为long，boolean，enum，date。使用方式：	List<FormProperty> formList = formService.getStartFormData(definition.getId()).getFormProperties();	formService.submitStartFormData(definition.getId(), formProperties);
 
-##持久化
+## 持久化
+所有表都在activiti-engine\src\main\resources\org\activiti\db\目录下     
+create目录中文件命名方式activiti.{db}.{create|drop}.   {type}.sql  
+例如：
+
+- activiti.mysql.create.engine.sql
+- activiti.mysql.create.history.sql
+- activiti.mysql.create.identity.sql
+
+1. engine：必须，engine执行所需的表；
+2. identity：可选，包含users，groups，memberships。当使用engine自带的认证管理时需要；
+3. history：可选，历史和审计信息，当history level设置为none时不需，同时会取消comment on task功能。
+
 Activiti使用到的表都是ACT_开头的。
 
-- ACT_RE_*：RepositoryService接口所操作的表
-- ACT_ID_*：IdentityService接口所操作的表
-- ACT_RU_*：运行时表 - RuntimeService接口所操作的表
-- ACT_HI_*：历史数据表，HistoryService接口所操作的表
+- ACT_RE_*：repository，包含流程定义，流程资源（images，rules）,RepositoryService接口所操作的表。
+- ACT_ID_*：identity，身份信息，如users，groups等，IdentityService接口所操作的表。
+- ACT_RU_*：runtime，流程实力的运行时数据。Activiti在流程执行时保存运行时数据，流程结束时删除运行时数据，以保证该表小且快。RuntimeService接口所操作的表。
+- ACT_HI_*：history，历史数据，如过往流程实例，变量，任务等，HistoryService接口所操作的表。
 - ACT_GE_*：全局数据
 
 注：由于Activiti会在任务或者流程结束时，删除其所在的运行时数据，存入历史数据表。所以保证了运行时表小且快。不会有性能问题。
@@ -209,18 +223,190 @@ USER_ID_|varchar(255)|ACT_ID_USER主键###ACT_HI_DETAIL
         </bean>  
       
     </beans>  
+## 实战
 
+### activiti designer
+  
+1.  http://www.activiti.org/designer/archived/下载最近版本designer
 
-##结合Spring
-1.Spring中定义数据连接及事务管理
-	<bean id="dataSource"	class="org.springframework.jdbc.datasource.DriverManagerDataSource">	<property name="driverClassName" value="com.mysql.jdbc.Driver" />	<property name="url"	value="jdbc:mysql://localhost:3306/boss?autoReconnect=true&amp;characterEncoding=UTF-8&amp;characterSe	tResults=UTF-8" />	<property name="username" value="root" />	<property name="password" value="" />	</bean>	<bean id="transactionManager"	class="org.springframework.jdbc.datasource.DataSourceTransactionManager">	<property name="dataSource" ref="dataSource" />
-	</bean>
+     eclipse->help->install new software->add->archive选择zip文件，OK
+2. eclipse->help-> install new software-> add
+    Name: activiti designer
+	Location: http://www.activiti.org/designer/update
+
+### activiti-explorer
+   
+下载http://activiti.org/alpha/activiti-explorer.war(经常下不下来)   
+或者下载github上的源码后，进入Activiti/modules/activiti-webapp-explorer2   
+mvn clean package -DskipTests
+将target目录下的activiti-webapp-explorer2-5.19-SNAPSHOT.war更名为activiti-explorer.war    
+将activiti-explorer.war拷贝到tomcat/webapps下，启动tomcat   
 	
-2.配置activiti
+	http://localhost:8080/activiti-explorer   
 
-	<bean id="processEngineConfiguration" class="org.activiti.spring.SpringProcessEngineConfiguration">	<property name="dataSource" ref="dataSource" />	<property name="transactionManager" ref="transactionManager" />	<property name="databaseSchemaUpdate" value="true" />	<property name="jobExecutorActivate" value="false" />	<property name="mailServerHost" value="mail.xxxx.com" />	<property name="mailServerPort" value="25" />	<property name="mailServerDefaultFrom" value="lwp@meituan.com" />	<property name="mailServerUsername" value="xxxx" />	<property name="mailServerPassword" value="xxxx" />	</bean>
+用户|密码|角色   
+---:|:---:|:---   
+kermit|kermit|admin   
+gonzo|gonzo|manager	  
+fozzie|fozzie|user  
 
-##常规使用1.定义流程引擎
+
+### activiti-rest
+
+下载github上的源码后，进入Activiti/modules/activiti-webapp-rest2   
+mvn clean package -DskipTests
+将target目录下的activiti-webapp-rest2-5.19-SNAPSHOT.war更名为activiti-rest.war    
+将activiti-explorer.war拷贝到tomcat/webapps下，启动tomcat    
+输入以上用户名密码   
+ 
+	http://localhost:8080/activiti-rest/service/repository/process-definitions
+
+### 连接MySQL
+
+修改activiti-explorer或者activiti-rest目录下Web-INF/classes/db.properties，指向mysql数据库
+
+	db=mysql
+	jdbc.driver=com.mysql.jdbc.Driver
+	jdbc.url=jdbc:mysql://192.168.1.3:3306/oa?useUnicode=true&characterEncoding=UTF8&zeroDateTimeBehavior=convertToNull&sessionVariables=storage_engine=InnoDB
+	jdbc.username=dwt
+	jdbc.password=
+
+将mysql-connector-java-x.x.x.jar拷贝到tomcat的lib目录下，启动tomcat。
+
+也可将项目导入Eclipse，项目右键->Run As ->Run on Server
+
+### Spring Boot integrate Activiti
+
+1. pom.xml 增加
+   		
+		//自动配置activiti
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-spring-boot-starter-basic</artifactId>
+			<version>5.19.0</version>
+		</dependency>
+		
+		//为activiti添加数据库连接
+		<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>commons-dbcp</groupId>
+			<artifactId>commons-dbcp</artifactId>
+		</dependency>		
+
+2. 在启动时创建一个Process，并提供一个名为dataSource的Bean
+		 
+		@SpringBootApplication
+		public class MyApplication {
+		
+		    public static void main(String[] args) {
+		        SpringApplication.run(MyApplication.class, args);
+		    }
+		
+		    @Bean
+		    public CommandLineRunner init(final RepositoryService repositoryService,
+		                                  final RuntimeService runtimeService,
+		                                  final TaskService taskService) {
+		
+		        return new CommandLineRunner() {
+		            @Override
+		            public void run(String... strings) throws Exception {
+		                System.out.println("Number of process definitions : "
+		                	+ repositoryService.createProcessDefinitionQuery().count());
+		                System.out.println("Number of tasks : " + taskService.createTaskQuery().count());
+		                runtimeService.startProcessInstanceByKey("oneTaskProcess");
+		                System.out.println("Number of tasks after process start: " + taskService.createTaskQuery().count());
+		            }
+		        };
+		
+		    }
+		
+		}
+
+		@Bean
+		public DataSource database() {
+		    return DataSourceBuilder.create()
+		        .url("jdbc:mysql://127.0.0.1:3306/activiti-spring-boot?characterEncoding=UTF-8")
+		        .username("alfresco")
+		        .password("alfresco")
+		        .driverClassName("com.mysql.jdbc.Driver")
+		        .build();
+		}
+
+3. src/main/resources目录下新增processes目录，添加bpmn文件，Activiti Engine启动时会默认读取processes目录下所有bpmn文件，创建Process definition。
+	
+	<?xml version="1.0" encoding="UTF-8"?>
+	<definitions
+	        xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL"
+	        xmlns:activiti="http://activiti.org/bpmn"
+	        targetNamespace="Examples">
+	
+	    <process id="oneTaskProcess" name="The One Task Process">
+	        <startEvent id="theStart" />
+	        <sequenceFlow id="flow1" sourceRef="theStart" targetRef="theTask" />
+	        <userTask id="theTask" name="my task" />
+	        <sequenceFlow id="flow2" sourceRef="theTask" targetRef="theEnd" />
+	        <endEvent id="theEnd" />
+	    </process>
+	
+	</definitions>
+
+4. 启动项目，activiti会自动检查数据库中是否存在表，如果不存在则新增表。
+
+### Spring Boot integrate Activiti Rest
+
+1. pom.xml新增
+
+		<dependency>
+			<groupId>org.activiti</groupId>
+			<artifactId>activiti-spring-boot-starter-rest-api</artifactId>
+			<version>5.19.0</version>
+		</dependency>
+
+2. SpringBootApplication excluse Activiti Rest自带的Spring Security
+
+	@SpringBootApplication(exclude = {org.activiti.spring.boot.RestApiAutoConfiguration.class,org.activiti.spring.boot.SecurityAutoConfiguration.class})
+	public class Application {
+
+3. 新增配置文件
+
+	@Configuration
+	public class ActivitiRestConfiguration {
+	
+	    @Bean()
+	    public RestResponseFactory restResponseFactory() {
+	      RestResponseFactory restResponseFactory = new RestResponseFactory();
+	      return restResponseFactory;
+	    }
+	
+	    @Bean()
+	    public ContentTypeResolver contentTypeResolver() {
+	      ContentTypeResolver resolver = new DefaultContentTypeResolver();
+	      return resolver;
+	    }
+	    
+	    @Configuration
+	    @ComponentScan({"org.activiti.rest.exception", "org.activiti.rest.service.api"}) 
+	    public static class ComponentScanRestResourcesConfiguration {
+	    	
+	    	// The component scan cannot be on the root configuration, it would trigger
+	    	// always even if the condition is evaluating to false.
+	    	// Hence, this 'dummy' configuration
+	    	
+	    }
+	
+	}
+
+4. 启动Spring Boot项目，在console中扫描到org.activiti.rest.service.api中的Controller
+	
+	2015-11-12 17:16:22.419 [main] INFO  org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping - Mapped "{[/form/form-data],methods=[GET],produces=[application/json]}" onto public org.activiti.rest.service.api.form.FormDataResponse org.activiti.rest.service.api.form.FormDataResource.getFormData(java.lang.String,java.lang.String,javax.servlet.http.HttpServletRequest)
+	2015-11-12 17:16:22.420 [main] INFO  org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping - Mapped "{[/form/form-data],methods=[POST],produces=[application/json]}" onto public org.activiti.rest.service.api.runtime.process.ProcessInstanceResponse org.activiti.rest.service.api.form.FormDataResource.submitForm(org.activiti.rest.service.api.form.SubmitFormRequest,javax.servlet.http.HttpServletRequest,javax.servlet.http.HttpServletResponse)
+
+5. 输入http://localhost:8080/repository/process-definitions， 用户名密码
+
+### Usage1.定义流程引擎
 	<bean id="processEngine" class="org.activiti.spring.ProcessEngineFactoryBean">	<property name="processEngineConfiguration" ref="processEngineConfiguration" />	</bean>
 2.定义流程中使用的对象
 	<bean id="myServiceTask" class="com.meituan.oa.MyServiceTask">	<property name="processEngine" ref="processEngine" />	</bean>	<bean id="myActivityBehavior" class="com.meituan.oa.MyActivityBehavior">	<property name="processEngine" ref="processEngine" />	</bean>	<bean id="myExecutionListener" class="com.meituan.oa.MyExecutionListener">	</bean>	<bean id="valueBean" class="com.meituan.oa.VOBean">	<property name="value" value="吃饭了少年" />	</bean>
